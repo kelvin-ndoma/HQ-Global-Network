@@ -7,7 +7,8 @@ Rails.application.routes.draw do
   patch '/sessions', to: 'sessions#update'
 
 
-  resources :users, only: [:show, :update, :destroy]
+  resources :users, only: [:show, :update, :destroy], via: [:patch, :put]
+
 
 
 
