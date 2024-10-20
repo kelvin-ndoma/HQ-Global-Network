@@ -7,6 +7,9 @@ Rails.application.routes.draw do
   patch '/sessions', to: 'sessions#update'
 
 
+  resources :users, only: [:show, :update, :destroy]
+
+
 
   # Route for health check
   get "up" => "rails/health#show", as: :rails_health_check
