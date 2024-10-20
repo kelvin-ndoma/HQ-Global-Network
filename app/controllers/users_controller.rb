@@ -2,8 +2,7 @@ class UsersController < ApplicationController
     include CurrentUserConcern
   
     before_action :set_user, only: [:show, :update, :destroy]
-    before_action :authorize_user!, only: [:show, :update]
-    before_action :authorize_admin!, only: [:destroy]
+    before_action :authorize_user!, only: [:show, :update, :destroy]
   
     def show
       render json: @user, include: [:groups, :events, :posts]
@@ -46,12 +45,6 @@ class UsersController < ApplicationController
   
     def authorize_user!
       unless @user == current_user
-        render json: { error: "You are not authorized to perform this action." }, status: :forbidden
-      end
-    end
-  
-    def authorize_admin!
-      unless current_user&.admin?
         render json: { error: "You are not authorized to perform this action." }, status: :forbidden
       end
     end
