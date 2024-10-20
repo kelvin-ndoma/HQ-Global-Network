@@ -7,25 +7,37 @@ class UsersController < ApplicationController
   
     def show
       render json: @user, include: [:groups, :events, :posts]
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "User not found." }, status: :not_found
     end
   
     def update
       if @user.update(user_params)
         render json: @user
       else
-        render json: @user.errors, status: :unprocessable_entity
+        render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
       end
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "User not found." }, status: :not_found
+    rescue StandardError => e
+      render json: { error: "An error occurred: #{e.message}" }, status: :internal_server_error
     end
   
     def destroy
       @user.destroy
       head :no_content
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "User not found." }, status: :not_found
+    rescue StandardError => e
+      render json: { error: "An error occurred: #{e.message}" }, status: :internal_server_error
     end
   
     private
   
     def set_user
       @user = User.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "User not found." }, status: :not_found
     end
   
     def user_params
@@ -33,14 +45,12 @@ class UsersController < ApplicationController
     end
   
     def authorize_user!
-      # Allow access only if the current user is the user being accessed
       unless @user == current_user
         render json: { error: "You are not authorized to perform this action." }, status: :forbidden
       end
     end
   
     def authorize_admin!
-      # Allow access only if the current user is an admin
       unless current_user&.admin?
         render json: { error: "You are not authorized to perform this action." }, status: :forbidden
       end
